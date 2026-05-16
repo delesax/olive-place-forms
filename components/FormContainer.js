@@ -215,20 +215,24 @@ export default function FormContainer({ form, onBack }) {
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="bg-white rounded-xl border border-gray-200 shadow-sm p-8 mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mx-auto">
-            {form.fields.map((field) => (
-              <div
-                key={field.name}
-                className={field.type === "textarea" ? "md:col-span-2" : ""}
-              >
-                <FormField
-                  field={field}
-                  value={formData[field.name]}
-                  onChange={handleFieldChange}
-                  error={errors[field.name]}
-                />
+          <div className="flex justify-center">
+            <div className="w-full max-w-2xl">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {form.fields.map((field) => (
+                  <div
+                    key={field.name}
+                    className={field.type === "textarea" ? "md:col-span-2" : ""}
+                  >
+                    <FormField
+                      field={field}
+                      value={formData[field.name]}
+                      onChange={handleFieldChange}
+                      error={errors[field.name]}
+                    />
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
           </div>
 
           {/* Submit Button */}
