@@ -215,7 +215,7 @@ export default function FormContainer({ form, onBack }) {
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="bg-white rounded-xl border border-gray-200 shadow-sm p-8 mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mx-auto">
             {form.fields.map((field) => (
               <div
                 key={field.name}
@@ -232,11 +232,11 @@ export default function FormContainer({ form, onBack }) {
           </div>
 
           {/* Submit Button */}
-          <div className="mt-10">
+          <div className="mt-10 flex justify-center">
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-4 rounded-lg hover:from-blue-700 hover:to-blue-800 font-bold text-lg disabled:from-blue-400 disabled:to-blue-500 transition shadow-lg hover:shadow-xl flex items-center justify-center space-x-2"
+              className="w-full max-w-md bg-gradient-to-r from-blue-600 to-blue-700 text-white py-4 rounded-lg hover:from-blue-700 hover:to-blue-800 font-bold text-lg disabled:from-blue-400 disabled:to-blue-500 transition shadow-lg hover:shadow-xl flex items-center justify-center space-x-2"
             >
               {loading ? (
                 <>
