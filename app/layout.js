@@ -1,7 +1,6 @@
 // app/layout.js
-// Root layout for Next.js app
-
 import "./globals.css";
+import { AuthProvider } from "../context/AuthContext";
 
 export const metadata = {
   title: "Olive Place Forms - Digital Form Management",
@@ -15,7 +14,9 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className="bg-gray-50">
-        {children}
+        <AuthProvider>
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );

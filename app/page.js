@@ -5,9 +5,19 @@ import { useState } from "react";
 import Link from "next/link";
 import Layout from "../components/Layout";
 import { forms, formCategories } from "../config/forms";
+import { useAuth } from "../context/AuthContext";
+import { signOut } from "../utils/supabase";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
   const [searchTerm, setSearchTerm] = useState("");
+  const { user, loading } = useAuth();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    await signOut();
+    router.push("/");
+  };
 
   const categorizedForms = Object.entries(formCategories).reduce(
     (acc, [key, label]) => {
@@ -34,12 +44,22 @@ export default function Home() {
               <span className="text-sm font-semibold text-blue-700">✨ Welcome Back</span>
             </div>
             <h1 className="text-5xl sm:text-6xl font-bold text-slate-900 mb-4 bg-gradient-to-r from-blue-600 via-blue-800 to-purple-900 bg-clip-text text-transparent">
-              Olive Place Forms
+              Forms Made Simple
             </h1>
             <p className="text-xl text-gray-600 mb-12 max-w-3xl mx-auto leading-relaxed">
               Complete your facility forms online. Download data, upload previous submissions, and manage everything in one place.
             </p>
 
+            {/* User Info Section */}
+            {!loading && user && (
+              <div className="mb-8 p-4 bg-emerald-50 border-2 border-emerald-200 rounded-lg inline-block">
+                <p className="text-emerald-900 font-semibold">
+                  Logged in as: <span className="text-emerald-600">{user.email}</span>
+                </p>
+              </div>
+            )}
+
+            {/* Search Bar */}
             <div className="max-w-2xl mx-auto mb-12">
               <div className="relative">
                 <input
@@ -49,9 +69,13 @@ export default function Home() {
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full px-6 py-4 text-lg border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition bg-white text-gray-900 placeholder-gray-500 shadow-sm"
                 />
+                <svg className="absolute right-6 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
               </div>
             </div>
 
+            {/* Statistics */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-12">
               <div className="bg-white rounded-xl p-6 border border-gray-100 hover:border-blue-200 transition shadow-sm">
                 <div className="text-3xl font-bold text-blue-600 mb-1">{forms.length}</div>
@@ -70,8 +94,33 @@ export default function Home() {
                 <p className="text-sm text-gray-600 font-medium">Fast & Secure</p>
               </div>
             </div>
+
+            {/* Auth Buttons */}
+            {!loading && !user && (
+              <div className="flex flex-col sm:flex-row justify-center gap-4 mb-12">
+                <Link href="/auth/login" className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold transition shadow-md hover:shadow-lg">
+                  Sign In
+                </Link>
+                <Link href="/auth/signup" className="px-8 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 font-semibold transition shadow-md hover:shadow-lg">
+                  Sign Up
+                </Link>
+              </div>
+            )}
+
+            {/* Logout Button */}
+            {!loading && user && (
+              <div className="mb-12">
+                <button
+                  onClick={handleLogout}
+                  className="px-8 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 font-semibold transition shadow-md hover:shadow-lg"
+                >
+                  Sign Out
+                </button>
+              </div>
+            )}
           </div>
 
+          {/* Forms Display */}
           {searchTerm && filteredForms && filteredForms.length > 0 ? (
             <div className="mb-12 animate-fade-in">
               <h2 className="text-3xl font-bold text-slate-900 mb-8">
@@ -79,7 +128,7 @@ export default function Home() {
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredForms.map((form) => (
-                  <Link key={form.id} href={`/form/${form.id}`}>
+                  <Link key={form.id} href={user ? `/form/${form.id}` : "/auth/login"}>
                     <div className="bg-white rounded-xl border border-gray-100 overflow-hidden hover:border-blue-300 hover:shadow-xl cursor-pointer h-full group">
                       <div className="bg-gradient-to-br from-blue-500 to-blue-600 px-6 py-4 group-hover:from-blue-600 group-hover:to-blue-700 transition">
                         <h3 className="text-lg font-bold text-white">{form.name}</h3>
@@ -130,7 +179,7 @@ export default function Home() {
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {categoryForms.map((form) => (
-                      <Link key={form.id} href={`/form/${form.id}`}>
+                      <Link key={form.id} href={user ? `/form/${form.id}` : "/auth/login"}>
                         <div className="bg-white rounded-xl border border-gray-100 overflow-hidden hover:border-blue-300 hover:shadow-xl cursor-pointer h-full group transition-all">
                           <div className="bg-gradient-to-br from-blue-500 to-blue-600 px-6 py-4 group-hover:from-blue-600 group-hover:to-blue-700 transition">
                             <h3 className="text-lg font-bold text-white line-clamp-2">{form.name}</h3>
