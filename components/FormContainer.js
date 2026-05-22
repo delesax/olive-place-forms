@@ -1,12 +1,11 @@
 // components/FormContainer.js
-// Modern form container with enhanced styling
+// Modern form container with enhanced styling and database integration
 
 "use client";
 
 import { useState, useCallback } from "react";
 import FormField from "./FormField";
-
-
+import { saveSubmission } from "../utils/submissionUtils";
 import {
   downloadJSON,
   downloadFile,
@@ -16,13 +15,12 @@ import {
   downloadWord,
 } from "../utils/formUtils";
 
-
-
 export default function FormContainer({ form, onBack }) {
   const [formData, setFormData] = useState({});
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
 
   const handleFieldChange = useCallback((fieldName, value) => {
     setFormData((prev) => ({
@@ -37,9 +35,10 @@ export default function FormContainer({ form, onBack }) {
     }
   }, [errors]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setErrors({});
 
     // Validate form data
     const newErrors = {};
@@ -78,9 +77,25 @@ export default function FormContainer({ form, onBack }) {
       return;
     }
 
+    // Save to database
+    const result = await saveSubmission(form.id, form.name, formData);
+
+    if (!result.success) {
+      setErrors({ submit: result.error });
+      setLoading(false);
+      return;
+    }
+
+    setSuccessMessage("Form submitted successfully! Your data has been saved.");
     setSubmitted(true);
     setLoading(false);
-    setTimeout(() => setSubmitted(false), 5000);
+    
+    // Reset form after 3 seconds
+    setTimeout(() => {
+      setSubmitted(false);
+      setSuccessMessage("");
+      setFormData({});
+    }, 3000);
   };
 
   const handleDownloadJSON = () => {
@@ -92,6 +107,16 @@ export default function FormContainer({ form, onBack }) {
     const fileName = generateFileName(form.id);
     const csv = formDataToCSV(formData, form.fields);
     downloadFile(csv, `${fileName}.csv`, "text/csv");
+  };
+
+  const handleDownloadPDF = () => {
+    const fileName = generateFileName(form.id);
+    downloadPDF(formData, form.fields, fileName);
+  };
+
+  const handleDownloadWord = () => {
+    const fileName = generateFileName(form.id);
+    downloadWord(formData, form.fields, fileName);
   };
 
   const handleUploadJSON = async (e) => {
@@ -110,6 +135,7 @@ export default function FormContainer({ form, onBack }) {
     setFormData({});
     setErrors({});
     setSubmitted(false);
+    setSuccessMessage("");
   };
 
   const formDataToCSV = (data, fields) => {
@@ -121,16 +147,6 @@ export default function FormContainer({ form, onBack }) {
       })
       .join(",");
     return `${headers}\n${values}`;
-  };
-
-  const handleDownloadPDF = () => {
-    const fileName = generateFileName(form.id);
-    downloadPDF(formData, form.fields, fileName);
-  };
-
-  const handleDownloadWord = () => {
-    const fileName = generateFileName(form.id);
-    downloadWord(formData, form.fields, fileName);
   };
 
   return (
@@ -157,7 +173,18 @@ export default function FormContainer({ form, onBack }) {
             <span className="text-2xl">✓</span>
             <div>
               <p className="font-semibold">Form submitted successfully!</p>
-              <p className="text-sm text-emerald-700 mt-1">Download your data below to save or share.</p>
+              <p className="text-sm text-emerald-700 mt-1">{successMessage}</p>
+            </div>
+          </div>
+        )}
+
+        {/* Error Message */}
+        {errors.submit && (
+          <div className="mb-8 p-5 bg-red-50 border-2 border-red-200 text-red-800 rounded-xl animate-fade-in flex items-start space-x-3">
+            <span className="text-2xl">✕</span>
+            <div>
+              <p className="font-semibold">Error submitting form</p>
+              <p className="text-sm text-red-700 mt-1">{errors.submit}</p>
             </div>
           </div>
         )}
@@ -188,16 +215,16 @@ export default function FormContainer({ form, onBack }) {
             </button>
             <button
               onClick={handleDownloadPDF}
-              className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-medium text-sm transition flex items-center space-x-2"
+              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium text-sm transition flex items-center space-x-2"
             >
-              <span>⬇</span>
+              <span>📄</span>
               <span>PDF</span>
             </button>
             <button
               onClick={handleDownloadWord}
               className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-medium text-sm transition flex items-center space-x-2"
             >
-              <span>⬇</span>
+              <span>📝</span>
               <span>Word</span>
             </button>
             <label className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-medium text-sm cursor-pointer transition flex items-center space-x-2">
@@ -264,7 +291,7 @@ export default function FormContainer({ form, onBack }) {
             <strong>Reference:</strong> {form.fileReference}
           </p>
           <p className="text-sm text-blue-700">
-            Download your completed form as JSON or CSV and keep it for your records. All data is processed securely on your device.
+            Your completed form will be saved to your account. You can view all your submissions in the "My Submissions" section. Download your form in multiple formats (JSON, CSV, PDF, Word) for your records.
           </p>
         </div>
       </div>
