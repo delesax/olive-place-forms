@@ -44,7 +44,7 @@ export default function Home() {
               <span className="text-sm font-semibold text-blue-700">✨ Welcome Back</span>
             </div>
             <h1 className="text-5xl sm:text-6xl font-bold text-slate-900 mb-4 bg-gradient-to-r from-blue-600 via-blue-800 to-purple-900 bg-clip-text text-transparent">
-              Forms Made Simple
+              Forms Mathias Made Simple
             </h1>
             <p className="text-xl text-gray-600 mb-12 max-w-3xl mx-auto leading-relaxed">
               Complete your facility forms online. Download data, upload previous submissions, and manage everything in one place.
